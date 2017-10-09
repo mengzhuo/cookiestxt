@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/mengzhuo/cookiestxt.svg?branch=master)](https://travis-ci.org/mengzhuo/cookiestxt)
 [![GoDoc](https://godoc.org/github.com/mengzhuo/cookiestxt?status.svg)](https://godoc.org/github.com/mengzhuo/cookiestxt)
+[![GoReportCard](https://goreportcard.com/badge/github.com/mengzhuo/cookiestxt)](https://goreportcard.com/report/github.com/mengzhuo/cookiestxt)
+![cover.run go](https://cover.run/go/github.com/mengzhuo/cookiestxt.svg)
 
 cookiestxt implement parser of cookies txt format
 
