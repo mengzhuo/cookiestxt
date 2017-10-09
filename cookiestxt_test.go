@@ -1,10 +1,29 @@
 package cookiestxt
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
 )
+
+func ExampleParseLine() {
+
+	c, _ := ParseLine(".netscape.com TRUE / TRUE 946684799 NETSCAPE_ID 100105")
+	fmt.Printf("Name=%s, Value=%s\n", c.Name, c.Value)
+	// Output: Name=NETSCAPE_ID, Value=100105
+}
+
+func ExampleParse() {
+
+	buf := strings.NewReader(`
+        # This example taken from http://www.cookiecentral.com/faq/#3.5
+        #HttpOnly_.netscape.com TRUE / FALSE 946684799 NETSCAPE_ID 100105
+        `)
+	cl, _ := Parse(buf)
+	fmt.Printf("Name[0]=%s, Value[0]=%s, Len=%d", cl[0].Name, cl[0].Value, len(cl))
+	// Output: Name[0]=NETSCAPE_ID, Value[0]=100105, Len=1
+}
 
 func TestParseLine(t *testing.T) {
 	bt := time.Unix(946684799, 0)
