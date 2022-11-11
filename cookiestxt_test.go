@@ -89,3 +89,9 @@ func TestParseFailed(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func BenchmarkParseLine(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ParseLine(".netscape.com / FALSE 946684799 NETSCAPE_ID 100103")
+	}
+}
