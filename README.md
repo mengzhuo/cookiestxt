@@ -1,7 +1,7 @@
 # cookiestxt
 
 [![Build Status](https://github.com/mengzhuo/cookiestxt/actions/workflows/go.yml/badge.svg)](https://github.com/mengzhuo/cookiestxt/actions)
-[![Go Reference](https://pkg.go.dev/badge/github.com/mengzhuo/cookietxt.svg)](https://pkg.go.dev/github.com/mengzhuo/cookietxt)
+[![Go Reference](https://pkg.go.dev/badge/github.com/mengzhuo/cookiestxt.svg)](https://pkg.go.dev/github.com/mengzhuo/cookiestxt)
 [![GoReportCard](https://goreportcard.com/badge/github.com/mengzhuo/cookiestxt)](https://goreportcard.com/report/github.com/mengzhuo/cookiestxt)
 [![Coverage Status](https://coveralls.io/repos/github/mengzhuo/cookiestxt/badge.svg?branch=master)](https://coveralls.io/github/mengzhuo/cookiestxt?branch=master)
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/avelino/awesome-go)
