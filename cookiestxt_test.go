@@ -25,6 +25,15 @@ func ExampleParse() {
 	// Output: Name[0]=NETSCAPE_ID, Value[0]=100105, Len=1
 }
 
+func TestParseEmptyValue(t *testing.T) {
+	bt := time.Unix(946684799, 0)
+	c, err := ParseLine(".netscape.com TRUE / TRUE 946684799 NETSCAPE_ID ")
+	if err != nil || c.Value != "" || c.Expires.Before(bt) || !c.Secure {
+		t.Error(err)
+	}
+	t.Log(c)
+}
+
 func TestParseLine(t *testing.T) {
 	bt := time.Unix(946684799, 0)
 	c, err := ParseLine(".netscape.com TRUE / TRUE 946684799 NETSCAPE_ID 100103")
