@@ -1,6 +1,6 @@
 # cookiestxt
 
-[![Build Status](https://github.com/mengzhuo/cookiestxt/actions)](https://github.com/mengzhuo/cookiestxt/actions/workflows/go.yml/badge.svg)
+[![Build Status](https://github.com/mengzhuo/cookiestxt/actions/workflows/go.yml/badge.svg)](https://github.com/mengzhuo/cookiestxt/actions)
 [![Go Reference](https://pkg.go.dev/badge/github.com/mengzhuo/cookietxt.svg)](https://pkg.go.dev/github.com/mengzhuo/cookietxt)
 [![GoReportCard](https://goreportcard.com/badge/github.com/mengzhuo/cookiestxt)](https://goreportcard.com/report/github.com/mengzhuo/cookiestxt)
 [![Coverage Status](https://coveralls.io/repos/github/mengzhuo/cookiestxt/badge.svg?branch=master)](https://coveralls.io/github/mengzhuo/cookiestxt?branch=master)
