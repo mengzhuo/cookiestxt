@@ -104,3 +104,59 @@ func BenchmarkParseLine(b *testing.B) {
 		ParseLine(".netscape.com / FALSE 946684799 NETSCAPE_ID 100103")
 	}
 }
+
+// ---- New stricter validation tests ----
+
+func TestParseBoolVariants(t *testing.T) {
+	cases := []struct {
+		secure string
+		want   bool
+	}{
+		{"1", true},
+		{"0", false},
+		{"TRUE", true},
+		{"false", false},
+		{"TrUe", true},
+	}
+
+	for _, tc := range cases {
+		line := fmt.Sprintf(".netscape.com TRUE / %s 946684799 NETSCAPE_ID 100103", tc.secure)
+		c, err := ParseLine(line)
+		if err != nil {
+			t.Fatalf("unexpected error for secure=%s: %v", tc.secure, err)
+		}
+		if c.Secure != tc.want {
+			t.Fatalf("secure mismatch for %s: want %v got %v", tc.secure, tc.want, c.Secure)
+		}
+	}
+}
+
+func TestParseInvalidFlag(t *testing.T) {
+	// invalid flag token (flagIdx)
+	_, err := ParseLine(".netscape.com MAYBE / TRUE 946684799 NETSCAPE_ID 100103")
+	if err == nil {
+		t.Fatal("expected error on invalid flag token")
+	}
+}
+
+func TestParseInvalidSecure(t *testing.T) {
+	_, err := ParseLine(".netscape.com TRUE / MAYBE 946684799 NETSCAPE_ID 100103")
+	if err == nil {
+		t.Fatal("expected error on invalid secure token")
+	}
+}
+
+func TestParseLongValue(t *testing.T) {
+	longVal := strings.Repeat("a", 200000) // 200KB value
+	line := fmt.Sprintf(".netscape.com TRUE / TRUE 946684799 NETSCAPE_ID %s\n", longVal)
+	cl, err := Parse(strings.NewReader(line))
+	if err != nil {
+		t.Fatalf("unexpected error parsing long line: %v", err)
+	}
+	if len(cl) != 1 {
+		t.Fatalf("expected 1 cookie, got %d", len(cl))
+	}
+	if cl[0].Value != longVal {
+		t.Fatal("cookie value mismatch for long value")
+	}
+}

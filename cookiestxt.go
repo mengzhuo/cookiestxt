@@ -44,40 +44,67 @@ const (
 // Parse cookie txt file format from input stream
 func Parse(rd io.Reader) (cl []*http.Cookie, err error) {
 	scanner := bufio.NewScanner(rd)
+	// allow bigger lines if needed
+	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
+
 	var line int
 	for scanner.Scan() {
 		line++
 
 		trimed := strings.TrimSpace(scanner.Text())
-		if len(trimed) < fieldsCount {
+		if trimed == "" {
 			continue
 		}
 
-		if trimed[0] == '#' && !strings.HasPrefix(trimed, httpOnlyPrefix) {
-			// comment
+		// skip comments except HttpOnly_ prefixed lines
+		if strings.HasPrefix(trimed, "#") && !strings.HasPrefix(trimed, httpOnlyPrefix) {
 			continue
 		}
 
 		var c *http.Cookie
-		c, err = ParseLine(scanner.Text())
+		c, err = ParseLine(trimed)
 		if err != nil {
 			return cl, fmt.Errorf("cookiestxt line:%d, err:%s", line, err)
 		}
 		cl = append(cl, c)
-		line++
 	}
 
 	err = scanner.Err()
 	return
 }
 
-// ParseLine parse single cookie from one line
+// ParseLine parse single cookie from one line with stricter validation
 func ParseLine(raw string) (c *http.Cookie, err error) {
+	raw = strings.TrimSpace(raw)
 	f := strings.Fields(raw)
 	if len(f) == fieldsCount-1 {
+		// missing value -> treat as empty
 		f = append(f, "")
 	} else if len(f) < fieldsCount {
-		err = fmt.Errorf("expecting fields=7, got=%d", len(f))
+		err = fmt.Errorf("expecting fields=%d, got=%d", fieldsCount, len(f))
+		return
+	}
+
+	// basic required fields
+	if strings.TrimSpace(f[domainIdx]) == "" {
+		err = fmt.Errorf("empty domain")
+		return
+	}
+	if strings.TrimSpace(f[nameIdx]) == "" {
+		err = fmt.Errorf("empty cookie name")
+		return
+	}
+
+	// validate flag (second field) format but do not use value
+	if _, perr := parseBoolStrict(f[flagIdx]); perr != nil {
+		err = fmt.Errorf("invalid flag value: %v", perr)
+		return
+	}
+
+	// secure field must be a valid boolean token
+	secureVal, perr := parseBoolStrict(f[secureIdx])
+	if perr != nil {
+		err = fmt.Errorf("invalid secure value: %v", perr)
 		return
 	}
 
@@ -87,7 +114,7 @@ func ParseLine(raw string) (c *http.Cookie, err error) {
 		Value:  f[valueIdx],
 		Path:   f[pathIdx],
 		MaxAge: 0,
-		Secure: parseBool(f[secureIdx]),
+		Secure: secureVal,
 	}
 
 	var ts int64
@@ -106,6 +133,24 @@ func ParseLine(raw string) (c *http.Cookie, err error) {
 	return
 }
 
+// parseBoolStrict validates boolean tokens and returns an error on unknown token.
+// Accepts: "1"/"0", "TRUE"/"FALSE" (case-insensitive).
+func parseBoolStrict(input string) (bool, error) {
+	s := strings.TrimSpace(input)
+	if s == "1" || s == "0" {
+		return s == "1", nil
+	}
+	if strings.EqualFold(s, "TRUE") {
+		return true, nil
+	}
+	if strings.EqualFold(s, "FALSE") {
+		return false, nil
+	}
+	return false, fmt.Errorf("expect TRUE/FALSE or 1/0, got %q", input)
+}
+
+// parseBool kept for compatibility; returns false on invalid input
 func parseBool(input string) bool {
-	return input == "TRUE"
+	b, _ := parseBoolStrict(input)
+	return b
 }
