@@ -101,7 +101,10 @@ func TestParseFailed(t *testing.T) {
 
 func BenchmarkParseLine(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		ParseLine(".netscape.com / FALSE 946684799 NETSCAPE_ID 100103")
+		_, err := ParseLine(".netscape.com / FALSE 946684799 NETSCAPE_ID 100103")
+		if err != nil {
+			b.Error(err)
+		}
 	}
 }
 
@@ -159,4 +162,14 @@ func TestParseLongValue(t *testing.T) {
 	if cl[0].Value != longVal {
 		t.Fatal("cookie value mismatch for long value")
 	}
+}
+
+func FuzzParseBool(f *testing.F) {
+	cases := []string{"0", "1", "True", "False"}
+	for _, tc := range cases {
+		f.Add(tc)
+	}
+	f.Fuzz(func(t *testing.T, s string) {
+		parseBoolStrict(s)
+	})
 }
