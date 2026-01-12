@@ -163,3 +163,13 @@ func TestParseLongValue(t *testing.T) {
 		t.Fatal("cookie value mismatch for long value")
 	}
 }
+
+func FuzzParseBool(f *testing.F) {
+	cases := []string{"0", "1", "True", "False"}
+	for _, tc := range cases {
+		f.Add(tc)
+	}
+	f.Fuzz(func(t *testing.T, s string) {
+		parseBoolStrict(s)
+	})
+}
