@@ -51,18 +51,18 @@ func Parse(rd io.Reader) (cl []*http.Cookie, err error) {
 	for scanner.Scan() {
 		line++
 
-		trimed := strings.TrimSpace(scanner.Text())
-		if trimed == "" {
+		trimmed := strings.TrimSpace(scanner.Text())
+		if trimmed == "" {
 			continue
 		}
 
 		// skip comments except HttpOnly_ prefixed lines
-		if strings.HasPrefix(trimed, "#") && !strings.HasPrefix(trimed, httpOnlyPrefix) {
+		if strings.HasPrefix(trimmed, "#") && !strings.HasPrefix(trimmed, httpOnlyPrefix) {
 			continue
 		}
 
 		var c *http.Cookie
-		c, err = ParseLine(trimed)
+		c, err = ParseLine(trimmed)
 		if err != nil {
 			return cl, fmt.Errorf("cookiestxt line:%d, err:%s", line, err)
 		}
