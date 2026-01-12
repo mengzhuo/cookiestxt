@@ -81,31 +81,26 @@ func ParseLine(raw string) (c *http.Cookie, err error) {
 		// missing value -> treat as empty
 		f = append(f, "")
 	} else if len(f) < fieldsCount {
-		err = fmt.Errorf("expecting fields=%d, got=%d", fieldsCount, len(f))
-		return
+		return nil, fmt.Errorf("expecting fields=%d, got=%d", fieldsCount, len(f))
 	}
 
 	// basic required fields
 	if strings.TrimSpace(f[domainIdx]) == "" {
-		err = fmt.Errorf("empty domain")
-		return
+		return nil, fmt.Errorf("empty domain")
 	}
 	if strings.TrimSpace(f[nameIdx]) == "" {
-		err = fmt.Errorf("empty cookie name")
-		return
+		return nil, fmt.Errorf("empty cookie name")
 	}
 
 	// validate flag (second field) format but do not use value
-	if _, perr := parseBoolStrict(f[flagIdx]); perr != nil {
-		err = fmt.Errorf("invalid flag value: %v", perr)
-		return
+	if _, err = parseBoolStrict(f[flagIdx]); err != nil {
+		return nil, fmt.Errorf("invalid flag value: %v", err)
 	}
 
 	// secure field must be a valid boolean token
-	secureVal, perr := parseBoolStrict(f[secureIdx])
-	if perr != nil {
-		err = fmt.Errorf("invalid secure value: %v", perr)
-		return
+	secureVal, err := parseBoolStrict(f[secureIdx])
+	if err != nil {
+		return nil, fmt.Errorf("invalid secure value: %v", err)
 	}
 
 	c = &http.Cookie{
@@ -147,10 +142,4 @@ func parseBoolStrict(input string) (bool, error) {
 		return false, nil
 	}
 	return false, fmt.Errorf("expect TRUE/FALSE or 1/0, got %q", input)
-}
-
-// parseBool kept for compatibility; returns false on invalid input
-func parseBool(input string) bool {
-	b, _ := parseBoolStrict(input)
-	return b
 }
