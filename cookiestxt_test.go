@@ -68,6 +68,32 @@ func TestParseUnixTime(t *testing.T) {
 	}
 }
 
+func TestParseFractionalUnixTime(t *testing.T) {
+	c, err := ParseLine(".netscape.com TRUE / FALSE 1234567890.123 NETSCAPE_ID 100103")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := time.Unix(1234567890, 123000000)
+	if !c.Expires.Equal(want) {
+		t.Errorf("expires mismatch: got %v want %v", c.Expires, want)
+	}
+
+	// trailing dot is tolerated
+	c, err = ParseLine(".netscape.com TRUE / FALSE 1234567890. NETSCAPE_ID 100103")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !c.Expires.Equal(time.Unix(1234567890, 0)) {
+		t.Errorf("expires mismatch on trailing dot: %v", c.Expires)
+	}
+
+	// non-numeric fractional part is rejected
+	_, err = ParseLine(".netscape.com TRUE / FALSE 1234567890.abc NETSCAPE_ID 100103")
+	if err == nil {
+		t.Error("expected error on non-numeric fractional part")
+	}
+}
+
 func TestParseFunc(t *testing.T) {
 	mock := `
 	# Comment

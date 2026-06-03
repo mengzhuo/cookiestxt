@@ -12,6 +12,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -112,12 +113,10 @@ func ParseLine(raw string) (c *http.Cookie, err error) {
 		Secure: secureVal,
 	}
 
-	var ts int64
-	ts, err = strconv.ParseInt(f[expirationIdx], 10, 64)
+	c.Expires, err = parseExpiration(f[expirationIdx])
 	if err != nil {
 		return
 	}
-	c.Expires = time.Unix(ts, 0)
 
 	c.Domain = f[domainIdx]
 	if strings.HasPrefix(c.Domain, httpOnlyPrefix) {
@@ -126,6 +125,32 @@ func ParseLine(raw string) (c *http.Cookie, err error) {
 	}
 
 	return
+}
+
+// parseExpiration parses a UNIX timestamp that may include an optional
+// fractional seconds component (e.g., "1778713108.123"). Some generators emit
+// millisecond precision this way.
+func parseExpiration(s string) (time.Time, error) {
+	intPart, fracPart, _ := strings.Cut(s, ".")
+	sec, err := strconv.ParseInt(intPart, 10, 64)
+	if err != nil {
+		return time.Time{}, err
+	}
+	var nsec int64
+	if fracPart != "" {
+		if len(fracPart) > 9 {
+			fracPart = fracPart[:9]
+		}
+		nsec, err = strconv.ParseInt(fracPart, 10, 64)
+		if err != nil {
+			return time.Time{}, err
+		}
+		nsec *= int64(math.Pow10(9 - len(fracPart)))
+		if strings.HasPrefix(intPart, "-") {
+			nsec = -nsec
+		}
+	}
+	return time.Unix(sec, nsec), nil
 }
 
 // parseBoolStrict validates boolean tokens and returns an error on unknown token.
